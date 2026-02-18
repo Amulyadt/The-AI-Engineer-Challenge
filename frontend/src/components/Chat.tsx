@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { sendMessage } from "@/lib/api";
+import { sendMessage } from "@/services/api";
 
 type Message = {
   role: "user" | "assistant";
