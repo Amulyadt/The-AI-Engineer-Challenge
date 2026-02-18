@@ -1,0 +1,5 @@
+# Dependencies for Vercel serverless function (api/index.py)
+# Root requirements.txt is used for local dev; this ensures api/ has deps on Vercel
+fastapi>=0.121.2
+openai>=1.0.0
+python-dotenv>=1.0.0

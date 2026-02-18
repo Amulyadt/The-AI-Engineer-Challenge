@@ -173,6 +173,9 @@ You'll want to make sure you share you *domains* hyperlink to ensure people can 
 
 > NOTE: Test this is the public link by trying to open your newly deployed site in an Incognito browser tab!
 
+**If you see "This Serverless Function has crashed" (500):**  
+In the Vercel project go to **Settings → Environment Variables**, add `OPENAI_API_KEY` with your OpenAI API key, then redeploy. The API needs this to run; the health check at `/` will work even without it, but chat will return an error until the key is set.
+
 ### 🎉 Congratulations! 
 
 You just deployed your first LLM-powered application! 🚀🚀🚀 Get on linkedin and post your results and experience! Make sure to tag us at @AIMakerspace!
