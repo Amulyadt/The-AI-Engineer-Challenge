@@ -4,13 +4,19 @@ from pydantic import BaseModel
 from openai import OpenAI
 import os
 
-# Load .env only when present (e.g. local dev); Vercel uses env vars from dashboard
-try:
-    from dotenv import load_dotenv
-    load_dotenv()
-except ImportError:
-    pass
 
+def _load_env():
+    """Load .env in local dev if python-dotenv is installed. No-op on Vercel."""
+    try:
+        from dotenv import load_dotenv
+        load_dotenv()
+    except ImportError:
+        pass
+
+
+_load_env()
+
+# On Vercel, env vars come from the dashboard. Locally, use .env or export OPENAI_API_KEY.
 app = FastAPI()
 
 # CORS so the frontend can talk to backend
