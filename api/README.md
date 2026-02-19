@@ -4,49 +4,61 @@ This is a FastAPI-based backend service that provides a chat interface using Ope
 
 ## Prerequisites
 
-- [`uv`](https://github.com/astral-sh/uv) package manager (`pip install uv`)
-- `uv` will provision Python 3.12 automatically for this project, so no separate interpreter installation is required
-- An OpenAI API key available as the `OPENAI_API_KEY` environment variable when you run the server
+- Python 3.10+
+- An OpenAI API key (set as `OPENAI_API_KEY` when you run the server)
+
+**Optional:** [`uv`](https://github.com/astral-sh/uv) package manager (`pip install uv`) can provision Python and install dependencies; otherwise use `pip` and a virtual environment.
 
 ## Setup
 
-All commands below assume you are running them from the repository root.
+All commands below assume you are running them from the **repository root**.
 
-1. Install dependencies into a local virtual environment managed by `uv`:
+**Option A – using `uv`:**
 
 ```bash
 uv sync
-```
-
-2. (Optional) Activate the virtual environment if you prefer to run commands manually:
-
-```bash
 source .venv/bin/activate  # Windows: .venv\Scripts\activate
 ```
 
-`uv` will create the `.venv` directory automatically on first sync and download Python 3.12 if it's not already available.
+**Option B – using pip and venv:**
+
+```bash
+python -m venv .venv
+source .venv/bin/activate   # Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+```
 
 ## Running the Server
 
-Start the FastAPI app with the dependencies managed by `uv`:
+With your virtual environment activated:
+
+```bash
+uvicorn api.index:app --reload
+```
+
+Or with `uv` (from repo root, no need to activate):
 
 ```bash
 uv run uvicorn api.index:app --reload
 ```
 
-This runs the app with `uvicorn` on `http://localhost:8000` with auto-reload enabled for development. The server will automatically restart when you make changes to the code.
+The app runs at **http://localhost:8000** with auto-reload for development.
 
-**Note:** Make sure the `OPENAI_API_KEY` environment variable is set in your shell before launching the server. You can set it with:
+**Setting `OPENAI_API_KEY`:** The chat endpoint requires an OpenAI API key. Use either:
+
+- **Environment variable:** `export OPENAI_API_KEY=sk-your-key-here`
+- **`.env` file:** In the repo root, create a `.env` file with `OPENAI_API_KEY=sk-your-key-here` (the API loads it when `python-dotenv` is installed). Do not commit `.env`.
+
+Without the key, `GET /` still returns `{"status":"ok"}`, but `POST /api/chat` will return 500 with "OPENAI_API_KEY not configured".
+
+**If you see "Address already in use":** Something is already using port 8000. Free it or use another port:
 
 ```bash
-export OPENAI_API_KEY=sk-your-key-here
+lsof -ti :8000 | xargs kill -9
+# then run uvicorn again
 ```
 
-If you encounter an "Address already in use" error, you may need to kill existing processes on port 8000:
-
-```bash
-lsof -ti:8000 | xargs kill -9
-```
+Or run on a different port: `uvicorn api.index:app --reload --port 8001` (and point the frontend at `http://localhost:8001`).
 
 ## API Endpoints
 
@@ -66,17 +78,12 @@ lsof -ti:8000 | xargs kill -9
 }
 ```
 
-The chat endpoint uses OpenAI's GPT-5 model with a supportive mental coach system prompt to provide helpful responses.
+The chat endpoint uses OpenAI's `gpt-3.5-turbo` model with a supportive mental coach system prompt.
 
-### Root Endpoint
+### Root / health
 - **URL**: `/`
 - **Method**: GET
-- **Response**: `{"status": "ok"}`
-
-### Health Check
-- **URL**: `/api/health`
-- **Method**: GET
-- **Response**: `{"status": "ok"}`
+- **Response**: `{"status": "ok"}` — use this to confirm the server is running.
 
 ## API Documentation
 
@@ -115,8 +122,9 @@ You should receive a JSON response with the AI's reply:
 }
 ```
 
-You can also test the health check endpoint:
+You can confirm the server is up with:
 
 ```bash
-curl http://127.0.0.1:8000/api/health
+curl http://127.0.0.1:8000/
+# Expect: {"status":"ok"}
 ```
