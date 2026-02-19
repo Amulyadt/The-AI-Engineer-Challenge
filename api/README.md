@@ -128,3 +128,4 @@ You can confirm the server is up with:
 curl http://127.0.0.1:8000/
 # Expect: {"status":"ok"}
 ```
+
