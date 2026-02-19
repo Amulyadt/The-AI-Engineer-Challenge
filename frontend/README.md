@@ -4,8 +4,14 @@ A clean, modern chat interface for the mental coach API.
 
 ## Prerequisites
 
-- Node.js 18+
-- npm or yarn
+- **Node.js 18+** and npm (they ship together)
+
+**If you see `npm: command not found`**, install Node.js first:
+
+- **macOS (Homebrew):** `brew install node`
+- **macOS / Windows:** Download the LTS installer from [nodejs.org](https://nodejs.org), run it, then restart your terminal.
+
+Check that it worked: `node -v` and `npm -v` should print version numbers.
 
 ## Running locally
 
