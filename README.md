@@ -163,6 +163,8 @@ While it is a bit counter-intuitive to set things up before jumping into vibe-co
 
 > NOTE: Remember, if you run into any errors - ask Cursor to help you fix them!
 
+> **Full app (frontend + API):** The default deploy only deploys the API. To get the chat UI live too, use **[docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)** — deploy the API in one Vercel project and the frontend (root `frontend`) in a second project, then set `NEXT_PUBLIC_API_URL` to the API URL. The frontend project’s URL is your public app link.
+
 </details>
 
 ### Vercel Link to Share
