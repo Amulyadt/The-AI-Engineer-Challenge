@@ -88,6 +88,15 @@ Once the server is running, you can access the interactive API documentation at:
 
 The API is configured to accept requests from any origin (`*`). This can be modified in the `index.py` file if you need to restrict access to specific domains.
 
+## Deploying on Vercel
+
+When you deploy this API to Vercel, the serverless function can crash if the runtime or env is misconfigured. To avoid that:
+
+1. **Set the environment variable** in the Vercel project: **Settings → Environment Variables** → add `OPENAI_API_KEY` (your OpenAI API key) for Production, Preview, and Development if you use them.
+2. **Redeploy** after adding the variable so the function gets the new env.
+
+Without `OPENAI_API_KEY`, the root endpoint `GET /` still returns `{"status": "ok"}`, but `POST /api/chat` will return 500 with "OPENAI_API_KEY not configured".
+
 ## Error Handling
 
 The API includes basic error handling for:

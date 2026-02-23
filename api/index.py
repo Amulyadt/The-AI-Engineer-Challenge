@@ -14,10 +14,14 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
     allow_methods=["*"],
-    allow_headers=["*"]
+    allow_headers=["*"],
 )
 
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
+def _get_openai_client():
+    """Lazy client so we don't fail at import if OPENAI_API_KEY is missing (e.g. on Vercel before env is set)."""
+    key = os.getenv("OPENAI_API_KEY")
+    return OpenAI(api_key=key) if key else None
 
 class ChatRequest(BaseModel):
     message: str
@@ -28,9 +32,9 @@ def root():
 
 @app.post("/api/chat")
 def chat(request: ChatRequest):
-    if not os.getenv("OPENAI_API_KEY"):
+    client = _get_openai_client()
+    if not client:
         raise HTTPException(status_code=500, detail="OPENAI_API_KEY not configured")
-    
     try:
         user_message = request.message
         response = client.chat.completions.create(

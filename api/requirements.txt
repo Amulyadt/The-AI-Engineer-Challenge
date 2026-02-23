@@ -1,0 +1,5 @@
+# Dependencies for Vercel serverless function (api/index.py).
+# Keep in sync with repo root requirements.txt.
+fastapi>=0.121.2
+openai>=1.0.0
+python-dotenv>=1.0.0
