@@ -4,7 +4,23 @@ import { useCallback, useRef, useEffect, useState } from "react";
 
 type Message = { role: "user" | "coach"; content: string };
 
+/** Base URL for the FastAPI backend. Set NEXT_PUBLIC_API_URL in .env.local (e.g. http://localhost:8000). */
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "";
+
+/**
+ * FastAPI can return detail as a string or an array of { msg: string } (e.g. validation errors).
+ * Normalize to a single string for display.
+ */
+function normalizeErrorDetail(detail: unknown): string {
+  if (typeof detail === "string") return detail;
+  if (Array.isArray(detail) && detail.length > 0) {
+    const first = detail[0];
+    if (first && typeof first === "object" && "msg" in first && typeof (first as { msg: unknown }).msg === "string") {
+      return (first as { msg: string }).msg;
+    }
+  }
+  return "Something went wrong.";
+}
 
 export function TerminalChat() {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -43,7 +59,7 @@ export function TerminalChat() {
       const data = await res.json().catch(() => ({}));
 
       if (!res.ok) {
-        setError(data.detail || `Error ${res.status}`);
+        setError(normalizeErrorDetail(data.detail) || `Error ${res.status}`);
         return;
       }
 
@@ -55,8 +71,8 @@ export function TerminalChat() {
     } catch (e) {
       setError(
         API_URL
-          ? "Could not reach the coach. Is the API running?"
-          : "Set NEXT_PUBLIC_API_URL in .env.local"
+          ? "Could not reach the coach. Is the FastAPI server running?"
+          : "Set NEXT_PUBLIC_API_URL in .env.local (e.g. http://localhost:8000)"
       );
     } finally {
       setLoading(false);
@@ -73,45 +89,51 @@ export function TerminalChat() {
       className="terminal-window"
       style={{
         width: "100%",
-        maxWidth: "560px",
+        maxWidth: "580px",
         borderRadius: "var(--radius-terminal)",
         overflow: "hidden",
-        boxShadow: "var(--shadow-soft), 0 0 0 1px var(--border-soft)",
-        background: "var(--terminal-surface)",
+        boxShadow: "var(--shadow-soft), var(--shadow-glow), 0 0 0 1px var(--border-soft)",
+        background: "var(--terminal-glass)",
+        backdropFilter: "blur(16px)",
+        WebkitBackdropFilter: "blur(16px)",
+        border: "1px solid var(--border-soft)",
         display: "flex",
         flexDirection: "column",
-        minHeight: "420px",
+        minHeight: "440px",
         maxHeight: "85vh",
+        animation: "terminalGlow 5s ease-in-out infinite",
       }}
     >
       {/* Title bar */}
       <div
         style={{
-          padding: "12px 16px",
+          padding: "14px 18px",
           background: "var(--terminal-bg)",
           borderBottom: "1px solid var(--border-soft)",
           display: "flex",
           alignItems: "center",
-          gap: "8px",
+          gap: "10px",
         }}
       >
         <span
           style={{
-            width: "10px",
-            height: "10px",
+            width: "12px",
+            height: "12px",
             borderRadius: "50%",
             background: "var(--accent-rose)",
-            boxShadow: "0 0 8px var(--accent-rose)",
+            boxShadow: "0 0 12px var(--accent-rose)",
           }}
         />
         <span
-          style={{
-            fontSize: "0.95rem",
-            fontWeight: 700,
-            color: "var(--accent-gold)",
-            letterSpacing: "0.02em",
-          }}
-        >
+            style={{
+              fontFamily: "var(--font-display), var(--font-nunito), system-ui, sans-serif",
+              fontSize: "1.1rem",
+              fontWeight: 700,
+              color: "var(--accent-gold)",
+              letterSpacing: "0.04em",
+              animation: "titleShine 3s ease-in-out infinite",
+            }}
+          >
           Mental Coach Terminal
         </span>
       </div>
@@ -119,13 +141,14 @@ export function TerminalChat() {
       {/* Messages area — scrollable, grows to fit content */}
       <div
         ref={scrollRef}
+        className="terminal-scroll"
         style={{
           flex: 1,
           overflowY: "auto",
-          padding: "16px",
+          padding: "18px",
           display: "flex",
           flexDirection: "column",
-          gap: "12px",
+          gap: "14px",
           minHeight: 0,
         }}
       >
@@ -133,7 +156,8 @@ export function TerminalChat() {
           <p
             style={{
               color: "var(--terminal-text-muted)",
-              fontSize: "0.9rem",
+              fontSize: "0.92rem",
+              lineHeight: 1.5,
               marginBottom: "4px",
             }}
           >
@@ -143,25 +167,27 @@ export function TerminalChat() {
         {messages.map((msg, i) => (
           <div
             key={i}
+            className="message-bubble"
             style={{
               alignSelf: msg.role === "user" ? "flex-end" : "flex-start",
               maxWidth: "90%",
-              padding: "10px 14px",
+              padding: "12px 16px",
               borderRadius: "var(--radius-inner)",
               background: msg.role === "user" ? "var(--user-bubble)" : "var(--coach-bubble)",
               border:
                 msg.role === "coach"
                   ? "1px solid var(--border-soft)"
-                  : "1px solid rgba(232, 180, 184, 0.2)",
+                  : "1px solid var(--accent-rose-glow)",
               whiteSpace: "pre-wrap",
               wordBreak: "break-word",
+              boxShadow: msg.role === "user" ? "0 4px 16px rgba(0,0,0,0.2)" : "none",
             }}
           >
             {msg.role === "coach" && (
               <span
                 style={{
                   color: "var(--accent-gold)",
-                  marginRight: "6px",
+                  marginRight: "8px",
                   fontWeight: 700,
                 }}
               >
@@ -173,25 +199,27 @@ export function TerminalChat() {
         ))}
         {loading && (
           <div
+            className="message-bubble"
             style={{
               alignSelf: "flex-start",
-              padding: "10px 14px",
+              padding: "12px 16px",
               borderRadius: "var(--radius-inner)",
               background: "var(--coach-bubble)",
               border: "1px solid var(--border-soft)",
               color: "var(--terminal-text-muted)",
               display: "flex",
               alignItems: "center",
-              gap: "6px",
+              gap: "8px",
             }}
           >
             <span
               style={{
-                width: "6px",
-                height: "6px",
+                width: "8px",
+                height: "8px",
                 borderRadius: "50%",
                 background: "var(--accent-gold)",
                 animation: "blink 1s ease-in-out infinite",
+                flexShrink: 0,
               }}
             />
             Coach is typing…
@@ -199,12 +227,13 @@ export function TerminalChat() {
         )}
         {error && (
           <div
+            className="message-bubble"
             style={{
-              padding: "10px 14px",
+              padding: "12px 16px",
               borderRadius: "var(--radius-inner)",
-              background: "rgba(200, 80, 80, 0.2)",
-              border: "1px solid rgba(200, 80, 80, 0.4)",
-              color: "#f0c0c0",
+              background: "rgba(180, 70, 70, 0.2)",
+              border: "1px solid rgba(220, 100, 100, 0.4)",
+              color: "#f0d0d0",
               fontSize: "0.9rem",
             }}
           >
@@ -217,12 +246,12 @@ export function TerminalChat() {
       <form
         onSubmit={handleSubmit}
         style={{
-          padding: "12px 16px",
+          padding: "14px 18px",
           borderTop: "1px solid var(--border-soft)",
           background: "var(--terminal-bg)",
         }}
       >
-        <div style={{ display: "flex", gap: "8px", alignItems: "flex-end" }}>
+        <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
           <input
             type="text"
             value={input}
@@ -232,16 +261,17 @@ export function TerminalChat() {
             autoFocus
             style={{
               flex: 1,
-              padding: "10px 14px",
+              padding: "12px 16px",
               borderRadius: "var(--radius-inner)",
               border: "1px solid var(--border-soft)",
               background: "var(--terminal-surface)",
               color: "var(--terminal-text)",
               fontSize: "0.95rem",
               outline: "none",
+              transition: "border-color 0.2s, box-shadow 0.2s",
             }}
             onFocus={(e) => {
-              e.target.style.boxShadow = `0 0 0 2px var(--accent-glow)`;
+              e.target.style.boxShadow = "0 0 0 2px var(--accent-glow)";
               e.target.style.borderColor = "var(--accent-gold)";
             }}
             onBlur={(e) => {
@@ -251,9 +281,10 @@ export function TerminalChat() {
           />
           <button
             type="submit"
+            className="btn-send"
             disabled={loading || !input.trim()}
             style={{
-              padding: "10px 18px",
+              padding: "12px 20px",
               borderRadius: "var(--radius-inner)",
               border: "none",
               background: "var(--accent-gold)",
@@ -261,6 +292,7 @@ export function TerminalChat() {
               fontWeight: 700,
               cursor: loading || !input.trim() ? "not-allowed" : "pointer",
               opacity: loading || !input.trim() ? 0.6 : 1,
+              transition: "transform 0.2s, box-shadow 0.2s, opacity 0.2s",
             }}
           >
             Send
