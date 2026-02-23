@@ -1,0 +1,54 @@
+/*
+ * Disney-style terminal theme.
+ * Dark background with warm cream text for clear contrast (no white-on-white).
+ * Accent colors: soft rose gold and warm gold for a friendly, magical feel.
+ */
+:root {
+  --terminal-bg: #1e1b2e;
+  --terminal-surface: #2d2a4a;
+  --terminal-text: #fef6e4;
+  --terminal-text-muted: #e8e0d0;
+  --accent-rose: #e8b4b8;
+  --accent-gold: #c9a66b;
+  --accent-glow: rgba(201, 166, 107, 0.25);
+  --user-bubble: #3d3a5c;
+  --coach-bubble: #2d2a4a;
+  --border-soft: rgba(254, 246, 228, 0.12);
+  --shadow-soft: 0 8px 32px rgba(0, 0, 0, 0.35);
+  --radius-terminal: 16px;
+  --radius-inner: 12px;
+}
+
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+html,
+body {
+  max-width: 100vw;
+  min-height: 100vh;
+  overflow-x: hidden;
+  background: linear-gradient(145deg, #1a1728 0%, #252238 50%, #1e1b2e 100%);
+  color: var(--terminal-text);
+  font-family: var(--font-nunito), system-ui, sans-serif;
+}
+
+/* Ensure inputs and buttons have good contrast and inherit theme */
+input,
+button,
+textarea {
+  font-family: inherit;
+  color: var(--terminal-text);
+}
+
+@keyframes blink {
+  0%,
+  100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 1;
+  }
+}
