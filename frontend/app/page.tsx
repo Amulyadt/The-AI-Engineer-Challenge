@@ -7,7 +7,11 @@ type Message = {
   content: string;
 };
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+// On Vercel, vercel.json rewrites /api/* to the FastAPI service on the same
+// domain, so production uses a relative URL. Locally, the backend runs on :8000.
+const API_BASE =
+  process.env.NEXT_PUBLIC_API_URL ??
+  (process.env.NODE_ENV === "production" ? "" : "http://localhost:8000");
 
 export default function Home() {
   const [messages, setMessages] = useState<Message[]>([
