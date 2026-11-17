@@ -138,10 +138,7 @@ export default function Home() {
               className="w-full resize-none rounded-2xl border border-slate-300 bg-white px-4 py-3 text-base text-slate-800 shadow-inner outline-none transition focus:border-violet-500 focus:ring-4 focus:ring-violet-200"
             />
 
-            <div className="flex items-center justify-between gap-3">
-              <p className="text-xs text-slate-500">
-                Connects to {API_BASE}/api/chat
-              </p>
+            <div className="flex items-center justify-end gap-3">
               <button
                 type="submit"
                 disabled={isLoading || !draft.trim()}
